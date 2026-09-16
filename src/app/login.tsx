@@ -31,7 +31,7 @@ export default function Login() {
     mutationFn: async () => {
       const result = await authClient.signOut();
       if (result.error) {
-        throw new Error("We couldn’t sign you out. Please try again.");
+        throw new Error("We couldn't sign you out. Please try again.");
       }
     },
     retry: false,
@@ -50,12 +50,12 @@ export default function Login() {
         </Text>
         <Text className="text-muted text-base leading-6">
           {session.data
-            ? "You’re ready to share updates with other students."
+            ? "You're ready to share updates with other students."
             : "Sign in or register to share a report. You can browse locations and reports without an account."}
         </Text>
       </View>
       {session.isPending ? (
-        <Spinner accessibilityLabel="Checking session" />
+        <Spinner accessibilityLabel="Authenticating" />
       ) : null}
       {session.data ? (
         <Card className="gap-5 p-5">
@@ -69,7 +69,7 @@ export default function Login() {
             isDisabled={signOut.isPending}
             onPress={() => signOut.mutate()}
           >
-            {signOut.isPending ? "Signing out…" : "Sign out"}
+            {signOut.isPending ? "Signing out..." : "Sign out"}
           </Button>
           {signOut.isError ? (
             <Text accessibilityRole="alert" className="text-danger">
