@@ -54,3 +54,23 @@ Join our community of developers creating universal apps.
 
 - [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
 - [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+
+## Locations API
+
+The locations list and detail screens load from the Workers API using TanStack Query. Start the API from `../api` with `npm run dev` after applying its local migrations and seed (see the API README). Copy `.env.example` to `.env.local` to override `EXPO_PUBLIC_API_URL`, then restart Expo.
+
+- Web and iOS simulator: `http://localhost:8787`
+- Android emulator: `http://10.0.2.2:8787`
+- Physical device: use your computer's LAN address and run the API with `npm run dev -- --ip 0.0.0.0`. Both devices must be on the same network.
+
+The frontend follows all pages of `GET /api/locations` and uses `GET /api/locations/:locationId` for details. Hours are shown in the location's specified timezone. Noise is an expected level, not a live report. No sign-in is needed. Web uses single-page output so new location URLs resolve at runtime; configure your web host to serve `index.html` for unmatched paths.
+
+Run location data tests with `bun test tests/locations.test.ts`.
+
+## Reports and sign-in
+
+Each location displays public reports in pages of 10 with a **Load more reports** button. Signed-in users see **Create**; guests see **Sign in to create a report**. The sign-in screen includes registration and returns to that location's report form after authentication. Account controls also support signing out.
+
+Reports include a crowd level and optional comment. Posting refreshes the list; validation and network errors keep the draft. Drafts survive the sign-in route in memory and are cleared on posting, canceling, or an app restart.
+
+The auth client and report requests use the same `EXPO_PUBLIC_API_URL` as location requests. Set the API's `BETTER_AUTH_URL` and `WEB_ORIGINS` for your environment (see the API README). Native sessions use Expo SecureStore; web sessions use browser cookies. Server-side authentication is required to create reports even if a client bypasses the UI.
