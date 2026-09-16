@@ -11,6 +11,7 @@ import {
   getAmenities,
   weekdays,
 } from "@/features/locations/api";
+import { LocationDistance } from "@/features/locations/location-distance";
 import { LocationWeather } from "@/features/locations/weather";
 import { LocationReports } from "@/features/reports/location-reports";
 
@@ -77,6 +78,7 @@ export default function LocationDetail() {
           {location.name}
         </Text>
       </View>
+      <LocationDistance location={location} />
       <LocationWeather locationId={location.id} />
       <Card className="gap-4 p-5">
         <Card.Header className="flex-row flex-wrap items-center justify-between gap-2">

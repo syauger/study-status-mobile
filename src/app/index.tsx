@@ -6,6 +6,7 @@ import { Text, View } from "react-native";
 import { LocationQueryState } from "@/components/location-query-state";
 import { Screen } from "@/components/screen";
 import { locationsQueryOptions, noiseLabels } from "@/features/locations/api";
+import { LocationDistance } from "@/features/locations/location-distance";
 
 export default function Index() {
   const query = useQuery(locationsQueryOptions);
@@ -79,6 +80,7 @@ export default function Index() {
                   <Card.Title className="text-xl font-semibold">
                     {location.name}
                   </Card.Title>
+                  <LocationDistance location={location} />
                   <Card.Description>
                     {location.description || "Explore this study location."}
                   </Card.Description>

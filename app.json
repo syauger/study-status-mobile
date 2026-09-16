@@ -32,6 +32,12 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationWhenInUsePermission": "Allow StudyStatus to use your location to show how far away study spots are."
+        }
       ]
     ],
     "experiments": {
