@@ -35,7 +35,7 @@ export const AuthForm = ({
       }
     },
     retry: false,
-    onSuccess: onAuthenticated,
+    onSuccess: onAuthenticated
   });
   const submit = async () => {
     if (submitting.current) {
