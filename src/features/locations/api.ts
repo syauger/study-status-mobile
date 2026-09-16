@@ -138,3 +138,26 @@ export const getAmenities = (value: string): string[] =>
         .filter(Boolean)
     ),
   ].map((item) => amenityLabels[item] ?? item);
+
+export interface Weather {
+  temperature_2m: number;
+  apparent_temperature: number;
+  weather_code: number;
+  wind_speed_10m: number;
+  time: number;
+}
+
+export const weatherQueryOptions = (locationId: number) =>
+  queryOptions({
+    queryKey: ["locations", "weather", locationId],
+    queryFn: async ({ signal }): Promise<Weather> => {
+      const result = await request<{ success: boolean; weather: Weather }>(
+        `/api/locations/${locationId}/weather`,
+        signal
+      );
+      return result.weather;
+    },
+    staleTime: 300_000,
+    refetchInterval: 300_000,
+    retry: 1,
+  });
