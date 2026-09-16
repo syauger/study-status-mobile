@@ -1,71 +1,129 @@
-# Welcome to your Expo app 👋
+# StudyStatus mobile
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+An Expo SDK 57 / React Native app for finding Georgia Tech study spaces, viewing hours, amenities, expected noise, distance, weather, and community reports. Browsing is public; creating reports requires an email/password account. Routing uses Expo Router, data fetching uses TanStack Query, and styling uses HeroUI Native and Uniwind.
 
-## Get started
+## Prerequisites
 
-1. Install dependencies
+- Node.js 22 LTS or newer and Bun (the repo uses `bun.lock`).
+- The companion API repo, preferably checked out as `../api`.
+- For iOS simulator: macOS and Xcode. For Android emulator: Android Studio with an emulator configured. Desktop web only needs a browser.
 
-   ```bash
-   npm install
-   ```
+## Run locally
 
-2. Start the app
+### 1. Start the API first
 
-   ```bash
-   npx expo start
-   ```
+Follow the [API README](../api/README.md) for full setup. From the API root:
 
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
-
-```bash
-npm run reset-project
+```sh
+npm ci
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Create `api/.dev.vars` (inside the API repo, not this repo):
 
-### Other setup steps
+```dotenv
+BETTER_AUTH_URL=http://localhost:8787
+BETTER_AUTH_SECRET=replace-with-a-generated-secret
+```
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+Generate the secret with:
 
-## Learn more
+```sh
+node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Paste the output in place of the placeholder, then run from the API root:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+```sh
+npm run migrate:dev
+npm run seed:dev
+npm run dev
+```
 
-## Join the community
+Keep the API running. [The locations endpoint](http://localhost:8787/api/locations) should return seeded locations. Local setup does not require deployment or Cloudflare login.
 
-Join our community of developers creating universal apps.
+### 2. Install the frontend and set its API URL
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+In a second terminal, from this repo's root:
 
-## Locations API
+```sh
+bun install --frozen-lockfile
+cp .env.example .env.local
+```
 
-The locations list and detail screens load from the Workers API using TanStack Query. Start the API from `../api` with `npm run dev` after applying its local migrations and seed (see the API README). Copy `.env.example` to `.env.local` to override `EXPO_PUBLIC_API_URL`, then restart Expo.
+**Edit `.env.local` before starting Expo.** For desktop web or the iOS simulator, use:
 
-- Web and iOS simulator: `http://localhost:8787`
-- Android emulator: `http://10.0.2.2:8787`
-- Physical device: use your computer's LAN address and run the API with `npm run dev -- --ip 0.0.0.0`. Both devices must be on the same network.
+```dotenv
+EXPO_PUBLIC_API_URL=http://localhost:8787
+```
 
-The frontend follows all pages of `GET /api/locations` and uses `GET /api/locations/:locationId` for details. Hours are shown in the location's specified timezone. Noise is an expected level, not a live report. No sign-in is needed. Web uses single-page output so new location URLs resolve at runtime; configure your web host to serve `index.html` for unmatched paths.
+The example file and code fallback currently point to a specific developer LAN address; explicitly replace it with your own URL. Use the API origin only, without `/api`; the app adds endpoint paths. `.env.local` is ignored by Git. `EXPO_PUBLIC_` values are bundled into the client, so never put the API auth secret here. See [Expo environment variables](https://docs.expo.dev/guides/environment-variables/).
 
-Run location data tests with `bun test tests/locations.test.ts`.
+| Where the app runs                       | `EXPO_PUBLIC_API_URL`           |
+| ---------------------------------------- | ------------------------------- |
+| Browser on your computer / iOS simulator | `http://localhost:8787`         |
+| Android Studio emulator                  | `http://10.0.2.2:8787`          |
+| Physical phone                           | `http://<computer-LAN-IP>:8787` |
+
+For Android or a physical phone, start the API with `npm start` instead of `npm run dev`; this listens on `0.0.0.0`. Set the API's `BETTER_AUTH_URL` to the same reachable URL in the table and restart it. A phone must be on the same network as your computer, with port 8787 reachable through the firewall. Do not use `localhost` or `0.0.0.0` as the phone's API hostname.
+
+### 3. Start Expo
+
+For desktop web:
+
+```sh
+bun run web --port 8081
+```
+
+For the Expo development server and platform picker:
+
+```sh
+bun start
+```
+
+Use `bun run ios` or `bun run android` to open an installed simulator/emulator. These scripts start Expo; they do not compile a native app. Expo Go requires a version compatible with SDK 57 and the project's native modules. If a compatible Expo Go is unavailable or a native module is missing, use a native development build with the platform toolchain installed:
+
+```sh
+bunx expo run:ios
+# Or:
+bunx expo run:android
+```
+
+These generate the native project directories; configure native behavior in `app.json`. See [Expo development builds](https://docs.expo.dev/develop/development-builds/introduction/) for device setup.
+
+After changing `.env.local`, restart Expo and fully reload the app. If it still uses the old URL, restart with `bunx expo start --clear`.
+
+### 4. Verify the connection and authentication
+
+The home screen should show the five seeded locations. Open one to see its details and reports, then register/sign in and create a report.
+
+The API defaults allow browser origins on `localhost` and `127.0.0.1`, ports 8081 and 8088. If Expo chooses another port or you open web through a LAN address, add that exact frontend origin to the API's `WEB_ORIGINS` (see the API README). This is the frontend browser URL, not the API URL. Use `localhost` consistently across the desktop browser frontend and API to avoid cookie issues.
+
+## Troubleshooting
+
+- **Cannot load locations:** verify `.env.local`, restart Expo, and open `<API URL>/api/locations` on the same device. Check that the API is running and its local database has been migrated and seeded.
+- **Locations load but sign-in/report posting fails:** check the API's auth secret, `BETTER_AUTH_URL`, and `WEB_ORIGINS`; restart the API after changes. Browser requests need session cookies.
+- **Phone cannot connect:** check the computer's LAN IP and shared network, start the API with `npm start`, and allow port 8787 through the firewall. An Expo tunnel does not also tunnel the API.
+- **Distance unavailable:** enable location permission. Distance is straight-line, not walking distance; the app remains usable without permission.
+- **Weather unavailable:** weather comes through the API from Open-Meteo and requires the API to have internet access.
+
+## Development and checks
+
+- `src/app/`: Expo Router screens and layouts.
+- `src/features/locations/`: API queries, distance, and weather UI.
+- `src/features/reports/` and `src/features/auth/`: reports, drafts, and authentication.
+- `src/lib/constants.ts`: shared API base URL.
+- `src/lib/auth-client.ts`: Better Auth client.
+- `app.json`: Expo scheme, plugins, and platform configuration.
+
+```sh
+bun run check
+bunx tsc --noEmit
+bun test tests/locations.test.ts tests/distance.test.ts
+```
+
+Use `bun run check` for the configured Ultracite (Oxlint/Oxfmt) lint and formatting checks. The legacy `lint` script invokes Expo's ESLint setup; ESLint is not the configured linter. The legacy `reset-project` script points to a missing file and is not a supported setup step.
+
+The frontend follows all pages of `GET /api/locations` and loads details from `GET /api/locations/:locationId`. Hours use the location's timezone; noise is an expected level rather than a live measurement. Web uses single-page output: a deployed web host must serve `index.html` for unmatched paths. Set `EXPO_PUBLIC_API_URL` before exporting/building for another environment.
 
 ## Reports and sign-in
 
