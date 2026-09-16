@@ -5,7 +5,11 @@ import tanstack from "ultracite/oxlint/tanstack";
 
 export default defineConfig({
   extends: [core, react, tanstack],
-  ignorePatterns: [...(core.ignorePatterns ?? []), "metro.config.js"],
+  ignorePatterns: [
+    ...(core.ignorePatterns ?? []),
+    "metro.config.js",
+    "src/uniwind-types.d.ts",
+  ],
   rules: {
     "no-use-before-define": "off",
     "react/function-component-definition": "off",
